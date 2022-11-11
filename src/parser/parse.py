@@ -130,11 +130,13 @@ class ParseItems(BaseParser):
             # Имя
             sku_name = soup.find("h1").text
             # Крошки
-            sku_category = ""
+            sku_category = []
             sku_categorys = soup.find("ul", {"class" : "breadcrumb-navigation"}).find_all("li")
             for li in sku_categorys:
-                if li.text != "&nbsp;→&nbsp;":
-                    sku_category += li.text+ "|"
+                text = "".join(filter(str.isalpha, li.text))
+                if text:
+                    sku_category.append(li.text)
+            sku_category = "|".join(sku_category)
             # Страна
             sku_country = soup.find("div", {"class" : "catalog-element-offer-left"}).text.split("Страна производства: ")[-1]
             fas = soup.find("b", {"style":"color:#000000;font-size: 22px;"}).text
@@ -161,6 +163,7 @@ class ParseItems(BaseParser):
                 if "/upload/" in img["src"]:
                     sku_image.append(self.start_url + img['src'])
             sku_image.append(self.start_url + sku_image_wraper.find("img", {"width" : "245"})['src'])
+            print(sku_category)
             # А теперь создадим новый инстанс итем
             item = Item()
             # Присвоим ему полученные значения
