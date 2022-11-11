@@ -16,14 +16,14 @@ class BaseParser():
         self.__restarts = 0
     # Запуск парсинга (Запускаепм скрипт, если произошла ошибка - перезапскаем)
     async def run(self):
-        try:
-            await self.start()
-        except Exception as e:
-            print(e)
-            if self.__restarts <= self.restart_count:
-                sleep(self.interval_m * 60)
-                self.__restarts += 1
-                await self.run()
+        # try:
+        await self.start()
+        # except Exception as e:
+        #     print(e)
+        #     if self.__restarts <= self.restart_count:
+        #         sleep(self.interval_m * 60)
+        #         self.__restarts += 1
+        #         await self.run()
     async def start():
         pass
     # Приостановить

@@ -1,10 +1,13 @@
 {
-    "output_directory" : "",
+    "output_directory" : "../docs/",
+    // Указать ID категорий, которые интересуют
     "categories" : [],
+    //  Указывать в виде 1-4
     "delay_range_s" : 0,
-    "max_retries" : 0,
+    "max_retries" : 3,
+    //  Передать через запяютую хедерсы
     "headers" : [],
-    "logs_dir" : "",
+    "logs_dir" : "../logs/",
     "restart": {
         "restart_count": 3,
         "interval_m": 0.2
