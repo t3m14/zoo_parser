@@ -17,7 +17,6 @@ async def write_cats_to_csv():
             last_cat = subcat['cat']['cat_id']
         sc.write_subcat_to_csv()
 async def main():
-    await write_cats_to_csv()
     await ParseItems().run()
 
     

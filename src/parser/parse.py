@@ -309,9 +309,9 @@ class ParseItems(BaseParser):
 
         for u in urls:
             # Спим рандомно, чтобы избежать бана
-            # await asyncio.sleep(
-            #     random.randint(int(self.delay_range_s[0]), int(self.delay_range_s[-1]))
-            # )
+            await asyncio.sleep(
+                random.randint(int(self.delay_range_s[0]), int(self.delay_range_s[-1]))
+            )
             try:
                 # А теперь попробуем спарсить товар
                 await sub_parse(u)

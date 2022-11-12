@@ -1,6 +1,6 @@
 {
     "output_directory" : "../docs/",
-    "categories" : ["181"],
+    "categories" : [],
     "delay_range_s" : "0-1",
     "max_retries" : 3,
     "headers" : [],
