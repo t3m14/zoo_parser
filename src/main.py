@@ -2,6 +2,9 @@ from ast import Sub
 from utils.load_config import get_json
 from parser.parse import *
 import asyncio
+import sys
+
+logger.debug("That's it, beautiful and simple logging!")
 async def write_cats_to_csv():
     parse = ParseSubcats()
     await parse.run()

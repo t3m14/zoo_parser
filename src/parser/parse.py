@@ -6,7 +6,13 @@ from .parser import BaseParser
 import asyncio
 import csv
 import random
+import sys
 output_directory = get_json()["output_directory"]
+logs_dir = get_json()["logs_dir"]
+from loguru import logger
+logger.add(sys.stderr, format="{time} {level} {message}")
+logger.add(f"{logs_dir}log.log", rotation="500 MB")
+
 # Интерфейсы, для записи в файл
 class Category:
     def __init__(self, cat_id, cat_name):
@@ -121,11 +127,13 @@ class ParseSubcats(BaseParser):
 
     # Получаем айтемы и подайтемы
     async def get_items(self):
-        print("Получаем итемы")
+        logger.info("Получаем итемы")
         # Переибраем только уникальные юрлы
         last_url = ""
         for subcat in self.subcats_list:
-            
+            await asyncio.sleep(
+                random.randint(int(self.delay_range_s[0]), int(self.delay_range_s[-1]))
+            )
             url = subcat["cat"]["subcat_url"]
             if last_url != url:
                 last_url = url
@@ -193,7 +201,7 @@ class ParseItems(BaseParser):
         async def sub_parse(u):  # Принимаем юрлик на страницу товара и сопсна далее мы его в наглую препарируем.
             html = await get_html(self.start_url + str(u))
             soup = BeautifulSoup(html, "html.parser")
-            print("Парсим страницу " + self.start_url + str(u))
+            logger.info("Парсим страницу " + self.start_url + str(u))
 
             # Цены на товар
             price = soup.find("s", {"style": "color:#000000;"}).text
@@ -267,7 +275,7 @@ class ParseItems(BaseParser):
             main_img = sku_image_wraper.find("img", {"width": "245"})
             sku_image.append(self.start_url + main_img["src"])
             sku_image = "|".join(sku_image)
-            print("Все данные успешно собраны")
+            logger.info("Все данные успешно собраны")
             # А теперь создадим новый инстанс итем
             item = Item()
             # Засунем в него все кишки из нашей страницы
@@ -286,7 +294,7 @@ class ParseItems(BaseParser):
             item.sku_link = sku_link
             item.sku_images = sku_image
             # И засейвим его в сиэсви)
-            print("Сейвим в csv")
+            logger.info("Сейвим в csv")
             item.write_item_to_csv()
 
         # Сначала делается вот это вот всё, а не то что выше
@@ -295,8 +303,8 @@ class ParseItems(BaseParser):
                 url
             )  # Попыточка получить юрлы, но поскольку мы могём улететь в бан логируем ошибку.
         except Exception as e:
-            print("Ошибка с урлами")
-            print(e)
+            logger.error("Ошибка с урлами")
+            logger.error(e)
             return
 
         for u in urls:
@@ -308,20 +316,20 @@ class ParseItems(BaseParser):
                 # А теперь попробуем спарсить товар
                 await sub_parse(u)
             except Exception as e:  # А если не вышло, не отчаиваемся - все ошибаются..
-                print("Ошибка парсинга")
-                print(e)
+                logger.error("Ошибка парсинга")
+                logger.error(e)
 
     # Получим ссылочки на товары
     async def get_items_urls(self, url: str) -> list:
-        print("Получаем урлы")
-        print(url)
+        logger.info("Получаем урлы")
+        logger.info(url)
         html = await get_html(url)
         soup = BeautifulSoup(html, "html.parser")
         divs = soup.find_all("div", {"class": "catalog-content-info"})
         hrefs = []
         for div in divs:
             hrefs.append(div.find("a", {"class": "name"})["href"])
-        print("ok")
+        logger.info("ok")
         return hrefs
 
     # Тут мы ассинхронно запускаем сбор инфы по всем всем товарам в каталоге
@@ -335,11 +343,11 @@ class ParseItems(BaseParser):
         await asyncio.gather(*tasks)
 
     async def get_catalog_urls_by_ids(self, ids: list):
-        print("Получаем урлы по категориям")
+        logger.info("Получаем урлы по категориям")
         subcats_names = []
         subcatparse = ParseSubcats()
         await subcatparse.run()
-        print("...")
+        logger.info("Начинаем получать категории")
         items = subcatparse.subcats_list
         last_subcat = ""
         for i in items:
@@ -353,18 +361,18 @@ class ParseItems(BaseParser):
                     if  uid in ids:
                         subcats_names.append(
                         str(i["subcat_name"])+str(uid))
-                        print("Получена нужная подкатегория")
+                        logger.info("Получена нужная подкатегория")
                         # ) if "subitem_url" in i else catalog_urls.append(i["item_url"])
         items = subcatparse.items_list
-        print("Парсим урлы")
+        logger.info("Парсим урлы")
         catalog_urls = []
         for i in items:
             if str(i["subcat"]["subcat_name"]) + str(i["subcat"]["subcat_id"]) + str(i["subcat"]["cat"]["cat_id"]) in subcats_names:
                 catalog_urls.append(
                     i["subitem_url"]
                 ) if "subitem_url" in i else catalog_urls.append(i["item_url"])
-                print("Получен урл " + i["subitem_url"] if "subitem_url" in i else catalog_urls.append(i["item_url"]))
-        print(catalog_urls)
+                logger.info("Получен урл " + i["subitem_url"] if "subitem_url" in i else catalog_urls.append(i["item_url"]))
+        logger.info(catalog_urls)
         return catalog_urls
         
         
