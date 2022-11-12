@@ -2,6 +2,8 @@ import aiohttp
 import asyncio
 from utils.load_config import get_json
 retries = get_json()["max_retries"]
+headers = get_json()["headers"]
+
 # Ассинхронное получение html
 async def get_html(url: str):
     async with aiohttp.ClientSession() as session:
@@ -10,6 +12,7 @@ async def get_html(url: str):
                 text = await response.text()
                 return text
         except Exception as e:
+            print("Ошибка запроса")
             print(e)
             global retries
             if retries > 0:

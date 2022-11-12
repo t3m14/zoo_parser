@@ -6,7 +6,7 @@ class BaseParser():
         config = get_json()
         self.output_directory = config["output_directory"]
         self.categories = config["categories"]
-        self.delay_range_s = config["delay_range_s"]
+        self.delay_range_s = config["delay_range_s"].split("-")
         self.max_retries = config["max_retries"]
         self.headers = config["headers"]
         self.logs_dir = config["logs_dir"]
@@ -16,14 +16,14 @@ class BaseParser():
         self.__restarts = 0
     # Запуск парсинга (Запускаепм скрипт, если произошла ошибка - перезапскаем)
     async def run(self):
-        # try:
-        await self.start()
-        # except Exception as e:
-        #     print(e)
-        #     if self.__restarts <= self.restart_count:
-        #         sleep(self.interval_m * 60)
-        #         self.__restarts += 1
-        #         await self.run()
+        try:
+            await self.start()
+        except Exception as e:
+            print(e)
+            if self.__restarts <= self.restart_count:
+                sleep(self.interval_m * 60)
+                self.__restarts += 1
+                await self.run()
     async def start():
         pass
     # Приостановить
